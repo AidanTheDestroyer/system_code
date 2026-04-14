@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'new_course.dart';
 import 'edit_course.dart';
-import '../instructor_index.dart';
+import '../instructor_index.dart'; // Routes to the shell instead of just the dashboard
 
 class InstructorCourseList extends StatefulWidget {
   const InstructorCourseList({super.key});
@@ -19,12 +19,17 @@ class _InstructorCourseListState extends State<InstructorCourseList> {
     {
       "title": "DATA STRUCTURES",
       "sched": "MonWed 7:30 AM - 9:30 AM",
-      "code": "CPE 401", 
+      "code": "CPE 401",
       "room": "Lab 402",
       "desc": "Focuses on the efficient organization and storage of data.",
       "color": const Color(0xFFC8E6C9),
       "category": "Core",
-      "students": ["Amigo, Raphael", "Brusco, Hannah", "Fabrino, Valerie", "Dela Cruz, Juan"]
+      "students": [
+        "Amigo, Raphael",
+        "Brusco, Hannah",
+        "Fabrino, Valerie",
+        "Dela Cruz, Juan",
+      ],
     },
     {
       "title": "ARTIFICIAL INTELLIGENCE",
@@ -34,12 +39,18 @@ class _InstructorCourseListState extends State<InstructorCourseList> {
       "desc": "Introduction to heuristic search and machine learning models.",
       "color": const Color(0xFFF8BBD0),
       "category": "AI",
-      "students": ["Garcia, Maria", "Johnson, Alex", "Lopez, Chris", "Tan, Kevin", "Reyes, Mika"]
+      "students": [
+        "Garcia, Maria",
+        "Johnson, Alex",
+        "Lopez, Chris",
+        "Tan, Kevin",
+        "Reyes, Mika",
+      ],
     },
   ];
 
   List<Map<String, dynamic>> _filteredCourses = [];
-  String _selectedCategory = "All"; 
+  String _selectedCategory = "All";
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -52,31 +63,41 @@ class _InstructorCourseListState extends State<InstructorCourseList> {
     String search = _searchController.text.toLowerCase();
     setState(() {
       _filteredCourses = _allCourses.where((course) {
-        bool matchesSearch = (course["title"] ?? "").toLowerCase().contains(search) || 
-                             (course["code"] ?? "").toLowerCase().contains(search);
-        bool matchesCategory = (_selectedCategory == "All") || (course["category"] == _selectedCategory);
+        bool matchesSearch =
+            (course["title"] ?? "").toLowerCase().contains(search) ||
+            (course["code"] ?? "").toLowerCase().contains(search);
+        bool matchesCategory =
+            (_selectedCategory == "All") ||
+            (course["category"] == _selectedCategory);
         return matchesSearch && matchesCategory;
       }).toList();
     });
   }
 
+  // --- FUNCTIONAL: HANDLES EDIT AND DELETE RESULTS ---
   Future<void> _handleEditCourse(Map<String, dynamic> course) async {
     final result = await Navigator.push(
-      context, 
-      MaterialPageRoute(builder: (context) => EditCoursePage(courseData: course))
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditCoursePage(courseData: course),
+      ),
     );
 
     if (!mounted) return;
 
     if (result == "DELETE") {
       setState(() {
+        // Remove from the master list
         _allCourses.removeWhere((item) => item['code'] == course['code']);
+        // Refresh the visible filtered list
         _applyFilters();
       });
       _showSnack("Subject removed from records.");
     } else if (result != null && result is Map<String, dynamic>) {
       setState(() {
-        int index = _allCourses.indexWhere((item) => item['code'] == course['code']);
+        int index = _allCourses.indexWhere(
+          (item) => item['code'] == course['code'],
+        );
         if (index != -1) {
           _allCourses[index] = result;
           _applyFilters();
@@ -103,40 +124,53 @@ class _InstructorCourseListState extends State<InstructorCourseList> {
       appBar: AppBar(
         backgroundColor: darkNavy,
         elevation: 0,
-        title: const Text('MY COURSES', 
-          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+        title: const Text(
+          'MY COURSES',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.1,
+          ),
+        ),
         centerTitle: true,
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          bool isMobile = constraints.maxWidth < 600;
-          
-          return Column(
-            children: [
-              _buildTopActionArea(isMobile),
-              Expanded(
-                child: _filteredCourses.isNotEmpty
-                    ? GridView.builder(
-                        padding: EdgeInsets.all(isMobile ? 15 : 20),
+      body: Column(
+        children: [
+          _buildTopActionArea(),
+          Expanded(
+            child: _filteredCourses.isNotEmpty
+                ? LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Use 2 columns on wide screens, 1 column on narrow phones
+                      int columns = constraints.maxWidth > 600 ? 2 : 1;
+                      return GridView.builder(
+                        padding: const EdgeInsets.all(16),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: isMobile ? 1 : 2,
-                          crossAxisSpacing: 18,
-                          mainAxisSpacing: 18,
-                          childAspectRatio: isMobile ? 1.8 : 1.1, 
+                          crossAxisCount: columns,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: columns == 1 ? 2.0 : 1.1,
                         ),
                         itemCount: _filteredCourses.length,
-                        itemBuilder: (context, index) => _courseCard(context, _filteredCourses[index], isMobile),
-                      )
-                    : const Center(child: Text("No courses found.", style: TextStyle(color: Colors.black45))),
-              ),
-            ],
-          );
-        }
+                        itemBuilder: (context, index) =>
+                            _courseCard(context, _filteredCourses[index]),
+                      );
+                    },
+                  )
+                : const Center(
+                    child: Text(
+                      "No courses found.",
+                      style: TextStyle(color: Colors.black45),
+                    ),
+                  ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTopActionArea(bool isMobile) {
+  Widget _buildTopActionArea() {
     return Container(
       padding: const EdgeInsets.all(20),
       color: Colors.white,
@@ -147,12 +181,15 @@ class _InstructorCourseListState extends State<InstructorCourseList> {
               Expanded(
                 child: Container(
                   height: 45,
-                  decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: TextField(
                     controller: _searchController,
                     onChanged: (v) => _applyFilters(),
                     decoration: const InputDecoration(
-                      hintText: "Search course...",
+                      hintText: "Search course name...",
                       prefixIcon: Icon(Icons.search, color: darkNavy, size: 20),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 10),
@@ -170,7 +207,12 @@ class _InstructorCourseListState extends State<InstructorCourseList> {
             height: 48,
             child: ElevatedButton.icon(
               onPressed: () async {
-                final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const NewCoursePage()));
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NewCoursePage(),
+                  ),
+                );
                 if (result != null && result is Map<String, dynamic>) {
                   setState(() {
                     _allCourses.insert(0, result);
@@ -179,10 +221,18 @@ class _InstructorCourseListState extends State<InstructorCourseList> {
                 }
               },
               icon: const Icon(Icons.add_rounded, color: Colors.white),
-              label: const Text("CREATE NEW COURSE", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+              label: const Text(
+                "CREATE NEW COURSE",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: darkNavy, 
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                backgroundColor: darkNavy,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -194,11 +244,19 @@ class _InstructorCourseListState extends State<InstructorCourseList> {
   Widget _buildFilterPopup() {
     return PopupMenuButton<String>(
       icon: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(color: const Color(0xFFF0F4F8), borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0F4F8),
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: const Icon(Icons.filter_list_rounded, color: darkNavy),
       ),
-      onSelected: (val) { setState(() { _selectedCategory = val; _applyFilters(); }); },
+      onSelected: (val) {
+        setState(() {
+          _selectedCategory = val;
+          _applyFilters();
+        });
+      },
       itemBuilder: (context) => [
         const PopupMenuItem(value: "All", child: Text("All Categories")),
         const PopupMenuItem(value: "Core", child: Text("Core Subjects")),
@@ -207,75 +265,134 @@ class _InstructorCourseListState extends State<InstructorCourseList> {
     );
   }
 
-  Widget _courseCard(BuildContext context, Map<String, dynamic> course, bool isMobile) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: cardBorder, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05), 
-            blurRadius: 10, 
-            offset: const Offset(0, 4)
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(height: 6, decoration: BoxDecoration(color: course['color'] ?? darkNavy, borderRadius: const BorderRadius.vertical(top: Radius.circular(20)))),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _courseCard(BuildContext context, Map<String, dynamic> course) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: cardBorder, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 6,
+              decoration: BoxDecoration(
+                color: course['color'] ?? darkNavy,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(
+                  MediaQuery.of(context).size.width > 600 ? 15 : 10,
+                ),
+                child: SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: Text(course['title'] ?? "Untitled", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: darkNavy), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                      GestureDetector(
-                        onTap: () => _handleEditCourse(course),
-                        child: const Icon(Icons.edit_note_rounded, color: darkNavy, size: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              course['title'] ?? "Untitled",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: darkNavy,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => _handleEditCourse(course),
+                            child: const Icon(
+                              Icons.edit_note_rounded,
+                              color: darkNavy,
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _cardDetailRow(
+                        Icons.tag_rounded,
+                        course['code'] ?? "N/A",
+                      ),
+                      _cardDetailRow(
+                        Icons.schedule_rounded,
+                        course['sched'] ?? "N/A",
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        course['desc'] ?? "",
+                        style: const TextStyle(
+                          fontSize: 9,
+                          color: Colors.black45,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 12),
+
+                      SizedBox(
+                        height: MediaQuery.of(context).size.width > 600
+                            ? 12
+                            : 4,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => InstructorIndex(
+                                  selectedSubjectCode: course['code'] ?? "N/A",
+                                  selectedSubjectName: course['title'] ?? "N/A",
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: darkNavy,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            "MANAGE",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  _cardDetailRow(Icons.tag_rounded, course['code'] ?? "N/A"),
-                  _cardDetailRow(Icons.schedule_rounded, course['sched'] ?? "N/A"),
-                  const SizedBox(height: 4),
-                  if(!isMobile) // Hide description on small mobile aspect ratios if needed, or keep for list view
-                  Text(course['desc'] ?? "", style: const TextStyle(fontSize: 9, color: Colors.black45), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  const Spacer(),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => InstructorIndex(
-                              selectedSubjectCode: course['code'] ?? "N/A",
-                              selectedSubjectName: course['title'] ?? "N/A",
-                            ),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: darkNavy,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        elevation: 0,
-                      ),
-                      child: const Text("MANAGE", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -287,7 +404,13 @@ class _InstructorCourseListState extends State<InstructorCourseList> {
         children: [
           Icon(icon, size: 12, color: Colors.grey),
           const SizedBox(width: 6),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 10, color: Color(0xFF636366)), overflow: TextOverflow.ellipsis)),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 10, color: Color(0xFF636366)),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );
