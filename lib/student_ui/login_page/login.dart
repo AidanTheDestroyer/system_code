@@ -15,7 +15,7 @@ class _LoginPageState extends State<LoginPage> {
   // 1. STATE VARIABLE FOR PASSWORD VISIBILITY
   bool _obscurePassword = true;
 
-  static const Color darkNavy = Color(0xFF0C1446); 
+  static const Color darkNavy = Color(0xFF0C1446);
 
   @override
   void dispose() {
@@ -35,10 +35,10 @@ class _LoginPageState extends State<LoginPage> {
         title: const Text(
           'SMART CLASSROOM FACILITATOR',
           style: TextStyle(
-            color: Colors.white, 
-            fontSize: 16, 
+            color: Colors.white,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
-            fontFamily: 'serif'
+            fontFamily: 'serif',
           ),
         ),
         centerTitle: true,
@@ -47,17 +47,24 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           children: [
             const SizedBox(height: 50),
-            
+
             const Center(
-              child: Icon(Icons.account_circle, size: 160, color: Colors.black12),
+              child: Icon(
+                Icons.account_circle,
+                size: 160,
+                color: Colors.black12,
+              ),
             ),
-            
+
             const SizedBox(height: 40),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 45),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 25,
+                  vertical: 45,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -67,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
                       color: Colors.black.withAlpha(12),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
-                    )
+                    ),
                   ],
                 ),
                 child: Column(
@@ -75,11 +82,11 @@ class _LoginPageState extends State<LoginPage> {
                     const Text(
                       "STUDENT LOGIN",
                       style: TextStyle(
-                        fontSize: 22, 
-                        fontWeight: FontWeight.bold, 
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                         color: darkNavy,
                         fontFamily: 'serif',
-                        letterSpacing: 1.1
+                        letterSpacing: 1.1,
                       ),
                     ),
                     const SizedBox(height: 45),
@@ -94,13 +101,15 @@ class _LoginPageState extends State<LoginPage> {
                     // 2. UPDATED PASSWORD INPUT WITH EYE ICON
                     _buildLoginInput(
                       controller: _passwordController,
-                      hint: 'Access Password',
+                      hint: 'Class Code',
                       icon: Icons.lock_outline,
                       isPassword: true,
                       obscureText: _obscurePassword,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           color: Colors.black38,
                         ),
                         onPressed: () {
@@ -110,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                         },
                       ),
                     ),
-                    
+
                     const SizedBox(height: 50),
 
                     SizedBox(
@@ -119,11 +128,15 @@ class _LoginPageState extends State<LoginPage> {
                       child: ElevatedButton(
                         onPressed: () async {
                           final navigator = Navigator.of(context);
-                          await Future.delayed(const Duration(milliseconds: 200));
+                          await Future.delayed(
+                            const Duration(milliseconds: 200),
+                          );
                           if (!mounted) return;
 
                           navigator.pushReplacement(
-                            MaterialPageRoute(builder: (context) => const StudentIndex()),
+                            MaterialPageRoute(
+                              builder: (context) => const StudentIndex(),
+                            ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -135,10 +148,10 @@ class _LoginPageState extends State<LoginPage> {
                         child: const Text(
                           'SIGN IN',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold, 
-                            letterSpacing: 1.5, 
-                            fontSize: 16, 
-                            fontFamily: 'serif'
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5,
+                            fontSize: 16,
+                            fontFamily: 'serif',
                           ),
                         ),
                       ),
@@ -148,17 +161,17 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 40),
-            
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 60),
               child: OutlinedButton(
-                onPressed: () => Navigator.pop(context), 
+                onPressed: () => Navigator.pop(context),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Colors.black12),
                   shape: const StadiumBorder(),
                 ),
                 child: const Text(
-                  "Switch to Instructor Portal", 
+                  "Switch to Instructor Portal",
                   style: TextStyle(color: Colors.black45, fontSize: 12),
                 ),
               ),
@@ -177,7 +190,7 @@ class _LoginPageState extends State<LoginPage> {
     required IconData icon,
     bool isPassword = false,
     bool obscureText = false, // Added to control visibility
-    Widget? suffixIcon,       // Added to accommodate the eye button
+    Widget? suffixIcon, // Added to accommodate the eye button
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -194,7 +207,10 @@ class _LoginPageState extends State<LoginPage> {
           prefixIcon: Icon(icon, color: darkNavy),
           suffixIcon: suffixIcon, // Added here
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 18,
+            horizontal: 10,
+          ),
         ),
       ),
     );
